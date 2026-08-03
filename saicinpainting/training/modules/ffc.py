@@ -83,10 +83,15 @@ class FourierUnit(nn.Module):
         r_size = x.size()
         # (batch, c, h, w/2+1, 2)
         fft_dim = (-3, -2, -1) if self.ffc3d else (-2, -1)
-        ffted = torch.fft.rfftn(x, dim=fft_dim, norm=self.fft_norm)
+        # torch.fft is not implemented for fp16 (e.g. on MPS): run the transform
+        # in fp32 and cast back, so the spectral conv can still run in fp16.
+        # No-op when x is already fp32.
+        in_dtype = x.dtype
+        ffted = torch.fft.rfftn(x.float(), dim=fft_dim, norm=self.fft_norm)
         ffted = torch.stack((ffted.real, ffted.imag), dim=-1)
         ffted = ffted.permute(0, 1, 4, 2, 3).contiguous()  # (batch, c, 2, h, w/2+1)
         ffted = ffted.view((batch, -1,) + ffted.size()[3:])
+        ffted = ffted.to(in_dtype)
 
         if self.spectral_pos_encoding:
             height, width = ffted.shape[-2:]
@@ -102,10 +107,11 @@ class FourierUnit(nn.Module):
 
         ffted = ffted.view((batch, -1, 2,) + ffted.size()[2:]).permute(
             0, 1, 3, 4, 2).contiguous()  # (batch,c, t, h, w/2+1, 2)
-        ffted = torch.complex(ffted[..., 0], ffted[..., 1])
+        ffted = torch.complex(ffted[..., 0].float(), ffted[..., 1].float())
 
         ifft_shape_slice = x.shape[-3:] if self.ffc3d else x.shape[-2:]
         output = torch.fft.irfftn(ffted, s=ifft_shape_slice, dim=fft_dim, norm=self.fft_norm)
+        output = output.to(in_dtype)
 
         if self.spatial_scale_factor is not None:
             output = F.interpolate(output, size=orig_size, mode=self.spatial_scale_mode, align_corners=False)

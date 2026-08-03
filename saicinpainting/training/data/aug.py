@@ -1,5 +1,26 @@
-from albumentations import DualIAATransform, to_tuple
-import imgaug.augmenters as iaa
+try:
+    # albumentations<1.0 + imgaug: the original training-time IAA transforms.
+    from albumentations import DualIAATransform, to_tuple
+    import imgaug.augmenters as iaa
+except ImportError:
+    # albumentations>=1.0 removed the IAA transforms and imgaug is not
+    # numpy>=2 compatible. These transforms are used ONLY for training
+    # augmentation; inference/prediction never instantiates them. Provide
+    # stubs so this module still imports on a modern stack.
+    try:
+        from albumentations import to_tuple
+    except ImportError:
+        from albumentations.core.utils import to_tuple
+
+    class DualIAATransform:  # minimal stub; usable classes require the old stack
+        def __init__(self, *args, **kwargs):
+            raise RuntimeError(
+                "IAA augmentations are unavailable on this stack "
+                "(albumentations>=1.0 / numpy>=2). They are training-only; "
+                "install albumentations==0.5.2 + imgaug to use them."
+            )
+
+    iaa = None
 
 class IAAAffine2(DualIAATransform):
     """Place a regular grid of points on the input and randomly move the neighbourhood of these point around
