@@ -65,6 +65,10 @@ def parse_args():
                    help='pad H/W up to a multiple of this (LaMa default 8)')
     p.add_argument('--out-suffix', default='.png',
                    help='output filename = <id> + this suffix')
+    p.add_argument('--compile', dest='compile', action='store_true', default=True,
+                   help='torch.compile the model (~11%% faster GPU forward; ~10s one-time '
+                        'compile). All images share one shape so it compiles once.')
+    p.add_argument('--no-compile', dest='compile', action='store_false')
     p.add_argument('--limit', type=int, default=0,
                    help='process at most N pairs (0 = all); handy for a smoke test')
     return p.parse_args()
@@ -171,6 +175,12 @@ def main():
 
     print(f'Loading model from {args.model} on {device} ...')
     model = load_model(args.model, args.checkpoint, device)
+    if args.compile:
+        # Static input shape (fixed resolution) => compiles once. The FFC's FFT
+        # can't be inductor-codegen'd (complex op) so it stays eager; the fusion
+        # of the surrounding conv/BN/act still buys ~11% on the GPU forward.
+        print('Compiling model (torch.compile, one-time ~10s) ...')
+        model = torch.compile(model, dynamic=False)
 
     reader = BatchReader(orig_h, orig_w, args.pad_modulo, args.batch_size, args.read_threads)
 
