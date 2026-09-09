@@ -135,3 +135,21 @@ dmypy.json
 .vscode/
 ## vim
 *.sw?
+
+# local artifacts (data, model weights, venvs, outputs)
+output*/
+out_*/
+outputs/
+venv*/
+models/
+big-lama/
+lama-fourier/
+lama-regular/
+dataset16
+LaMa_test_images/
+mps_data/
+mask_erosion_compare/
+eval/
+*.zip
+.DS_Store
+wut.sh
