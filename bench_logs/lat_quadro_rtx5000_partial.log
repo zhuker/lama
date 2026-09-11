@@ -1,0 +1,14 @@
+# Quadro RTX 5000 Max-Q (zhuker-blade) -- PARTIAL run, captured before the
+# machine dropped off the network mid-sweep. torch 2.14.0+cu130, CUDA 13.0.
+############ zhuker-blade 1280x720 eager :: fp32 + fp16-amp (FFT in fp32)
+[fp32]  (eager)
+  compute      mean 1106.24  median 1110.00  p90 1190.50  p99 1205.52  min  980.74  max 1207.79  ms   |     0.9 fps
+  end_to_end   mean  922.88  median 1217.17  p90 1255.47  p99 1275.03  min  561.69  max 1280.59  ms   |     1.1 fps
+[fp16-amp]  (eager)
+  compute      mean  269.90  median  270.33  p90  271.19  p99  272.69  min  265.98  max  272.79  ms   |     3.7 fps
+  end_to_end   mean  269.00  median  268.66  p90  271.38  p99  272.10  min  265.87  max  272.56  ms   |     3.7 fps
+############ zhuker-blade 1280x720 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+############ zhuker-blade 1280x720 eager :: fp16-half, fp32 FFT island
+  (host became unreachable during this run; no further results)

@@ -1,0 +1,210 @@
+MODEL=lama-fourier ITERS=200 COOLDOWN=0 TELEMETRY=0
+############ pop-os lama-fourier 1280x720 eager :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 49, 180 MHz, 19.38 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp32]  (eager)
+  compute      mean   25.57  median   25.57  p90   25.64  p99   25.65  min   25.47  max   25.72  ms   |    39.1 fps
+  end_to_end   mean   25.96  median   25.95  p90   25.98  p99   26.44  min   25.91  max   26.49  ms   |    38.5 fps
+[fp16-amp]  (eager)
+  compute      mean   15.95  median   15.95  p90   15.97  p99   15.99  min   15.92  max   15.99  ms   |    62.7 fps
+  end_to_end   mean   16.44  median   16.44  p90   16.48  p99   16.50  min   16.39  max   16.51  ms   |    60.8 fps
+############ pop-os lama-fourier 1280x720 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 58, 2857 MHz, 193.88 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+############ pop-os lama-fourier 1280x720 eager :: fp16-half, fp32 FFT island   [gpu before: 56, 2407 MHz, 93.22 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (eager)
+  compute      mean   16.02  median   16.03  p90   16.08  p99   16.16  min   15.94  max   16.23  ms   |    62.4 fps
+  end_to_end   mean   16.54  median   16.53  p90   16.56  p99   16.93  min   16.48  max   16.97  ms   |    60.5 fps
+############ pop-os lama-fourier 1280x720 compiled :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 58, 2857 MHz, 197.91 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp32]  (compiled: reduce-overhead)
+  compute      mean   17.99  median   17.99  p90   18.00  p99   18.09  min   17.97  max   18.59  ms   |    55.6 fps
+  end_to_end   mean   18.30  median   18.30  p90   18.31  p99   18.52  min   18.27  max   18.63  ms   |    54.6 fps
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean    9.17  median    9.17  p90    9.18  p99    9.20  min    9.16  max    9.22  ms   |   109.0 fps
+  end_to_end   mean    9.47  median    9.47  p90    9.48  p99    9.50  min    9.29  max    9.51  ms   |   105.6 fps
+############ pop-os lama-fourier 1280x720 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 56, 2445 MHz, 101.36 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+############ pop-os lama-fourier 1280x720 compiled :: fp16-half, fp32 FFT island   [gpu before: 51, 2400 MHz, 73.86 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean    9.05  median    8.98  p90    9.24  p99    9.66  min    8.97  max    9.79  ms   |   110.6 fps
+  end_to_end   mean    9.55  median    9.55  p90    9.57  p99    9.66  min    9.51  max    9.97  ms   |   104.7 fps
+############ pop-os lama-fourier 1024x512 eager :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 52, 2632 MHz, 93.99 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp32]  (eager)
+  compute      mean   15.65  median   15.65  p90   15.67  p99   15.70  min   15.61  max   15.88  ms   |    63.9 fps
+  end_to_end   mean   15.92  median   15.92  p90   15.95  p99   16.15  min   15.86  max   16.18  ms   |    62.8 fps
+[fp16-amp]  (eager)
+  compute      mean   10.43  median   10.44  p90   10.45  p99   10.45  min   10.41  max   10.46  ms   |    95.8 fps
+  end_to_end   mean   10.71  median   10.71  p90   10.72  p99   10.74  min   10.68  max   10.75  ms   |    93.4 fps
+############ pop-os lama-fourier 1024x512 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 55, 2857 MHz, 245.20 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (eager)
+  compute      mean    9.82  median    9.82  p90    9.84  p99    9.86  min    9.77  max   10.01  ms   |   101.8 fps
+  end_to_end   mean   10.14  median   10.14  p90   10.16  p99   10.35  min   10.11  max   10.39  ms   |    98.6 fps
+  ** NaN detected in output (numerically unstable) **
+############ pop-os lama-fourier 1024x512 eager :: fp16-half, fp32 FFT island   [gpu before: 55, 2857 MHz, 172.58 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (eager)
+  compute      mean   10.50  median   10.50  p90   10.51  p99   10.55  min   10.45  max   10.71  ms   |    95.3 fps
+  end_to_end   mean   10.83  median   10.83  p90   10.85  p99   11.00  min   10.80  max   11.08  ms   |    92.3 fps
+############ pop-os lama-fourier 1024x512 compiled :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 55, 2857 MHz, 219.09 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp32]  (compiled: reduce-overhead)
+  compute      mean   11.24  median   11.23  p90   11.24  p99   11.86  min   11.21  max   11.98  ms   |    89.0 fps
+  end_to_end   mean   11.36  median   11.36  p90   11.38  p99   11.51  min   11.34  max   11.54  ms   |    88.0 fps
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean    6.17  median    6.17  p90    6.18  p99    6.21  min    6.16  max    6.29  ms   |   162.0 fps
+  end_to_end   mean    6.30  median    6.30  p90    6.31  p99    6.32  min    6.28  max    6.32  ms   |   158.7 fps
+############ pop-os lama-fourier 1024x512 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 52, 2407 MHz, 88.07 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean    5.52  median    5.52  p90    5.52  p99    5.54  min    5.50  max    6.35  ms   |   181.1 fps
+  end_to_end   mean    5.74  median    5.68  p90    5.85  p99    6.03  min    5.66  max    6.06  ms   |   174.2 fps
+  ** NaN detected in output (numerically unstable) **
+############ pop-os lama-fourier 1024x512 compiled :: fp16-half, fp32 FFT island   [gpu before: 51, 2872 MHz, 92.71 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean    6.00  median    6.00  p90    6.00  p99    6.02  min    5.98  max    6.82  ms   |   166.7 fps
+  end_to_end   mean    6.32  median    6.32  p90    6.33  p99    6.38  min    6.30  max    6.52  ms   |   158.1 fps
+############ pop-os lama-fourier 832x480 eager :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 50, 2827 MHz, 91.07 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp32]  (eager)
+  compute      mean   12.46  median   12.46  p90   12.48  p99   12.50  min   12.42  max   12.66  ms   |    80.3 fps
+  end_to_end   mean   12.70  median   12.70  p90   12.71  p99   12.93  min   12.66  max   12.96  ms   |    78.8 fps
+[fp16-amp]  (eager)
+  compute      mean    8.50  median    8.50  p90    8.50  p99    8.51  min    8.48  max    8.51  ms   |   117.7 fps
+  end_to_end   mean    8.72  median    8.72  p90    8.73  p99    8.75  min    8.69  max    8.91  ms   |   114.7 fps
+############ pop-os lama-fourier 832x480 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 52, 2857 MHz, 154.93 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[60, 104]
+############ pop-os lama-fourier 832x480 eager :: fp16-half, fp32 FFT island   [gpu before: 51, 2400 MHz, 79.71 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (eager)
+  compute      mean    8.48  median    8.48  p90    8.49  p99    8.49  min    8.46  max    8.65  ms   |   118.0 fps
+  end_to_end   mean    8.75  median    8.75  p90    8.76  p99    8.91  min    8.73  max    8.92  ms   |   114.3 fps
+############ pop-os lama-fourier 832x480 compiled :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 52, 2872 MHz, 254.66 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp32]  (compiled: reduce-overhead)
+  compute      mean    9.05  median    9.05  p90    9.05  p99    9.09  min    9.03  max    9.88  ms   |   110.5 fps
+  end_to_end   mean    9.02  median    8.93  p90    9.16  p99    9.18  min    8.91  max    9.30  ms   |   110.9 fps
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean    4.89  median    4.89  p90    4.90  p99    4.91  min    4.88  max    4.91  ms   |   204.3 fps
+  end_to_end   mean    5.01  median    5.01  p90    5.01  p99    5.03  min    4.99  max    5.06  ms   |   199.8 fps
+############ pop-os lama-fourier 832x480 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 50, 2542 MHz, 88.77 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[60, 104]
+############ pop-os lama-fourier 832x480 compiled :: fp16-half, fp32 FFT island   [gpu before: 48, 2400 MHz, 71.58 W]
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/lama-fourier ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean    4.74  median    4.74  p90    4.75  p99    4.77  min    4.73  max    5.54  ms   |   210.8 fps
+  end_to_end   mean    5.01  median    5.00  p90    5.01  p99    5.27  min    4.98  max    5.34  ms   |   199.7 fps
+BENCH_DONE_OK

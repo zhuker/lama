@@ -2,10 +2,18 @@
 # original implementation https://github.com/pkumivision/FFC/blob/main/model_zoo/ffc.py
 # paper https://proceedings.neurips.cc/paper/2020/file/2fd5d41ec6cfab47e32164d5624269b1-Paper.pdf
 
+import os
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+# When LAMA_FP16_FFT=1 and the input is fp16, run the FFT in half precision
+# (complex32) instead of casting to fp32. cuFFT only supports half-precision
+# transforms for power-of-2 sizes, so this is valid only when the feature-map
+# spatial dims are powers of two (e.g. a 1024x512 input -> 128x64 features).
+_FP16_FFT = os.environ.get('LAMA_FP16_FFT') == '1'
 
 from saicinpainting.training.modules.base import get_activation, BaseDiscriminator
 from saicinpainting.training.modules.spatial_transform import LearnableSpatialTransformWrapper
@@ -83,10 +91,17 @@ class FourierUnit(nn.Module):
         r_size = x.size()
         # (batch, c, h, w/2+1, 2)
         fft_dim = (-3, -2, -1) if self.ffc3d else (-2, -1)
-        ffted = torch.fft.rfftn(x, dim=fft_dim, norm=self.fft_norm)
+        # torch.fft is not implemented for fp16 (e.g. on MPS): run the transform
+        # in fp32 and cast back, so the spectral conv can still run in fp16.
+        # No-op when x is already fp32. When LAMA_FP16_FFT=1 and x is fp16,
+        # keep the transform in half precision (complex32) -- pow-2 sizes only.
+        in_dtype = x.dtype
+        fp16_fft = _FP16_FFT and x.dtype == torch.float16
+        ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
         ffted = torch.stack((ffted.real, ffted.imag), dim=-1)
         ffted = ffted.permute(0, 1, 4, 2, 3).contiguous()  # (batch, c, 2, h, w/2+1)
         ffted = ffted.view((batch, -1,) + ffted.size()[3:])
+        ffted = ffted.to(in_dtype)
 
         if self.spectral_pos_encoding:
             height, width = ffted.shape[-2:]
@@ -102,10 +117,14 @@ class FourierUnit(nn.Module):
 
         ffted = ffted.view((batch, -1, 2,) + ffted.size()[2:]).permute(
             0, 1, 3, 4, 2).contiguous()  # (batch,c, t, h, w/2+1, 2)
-        ffted = torch.complex(ffted[..., 0], ffted[..., 1])
+        if fp16_fft:
+            ffted = torch.view_as_complex(ffted.contiguous())  # complex32
+        else:
+            ffted = torch.complex(ffted[..., 0].float(), ffted[..., 1].float())
 
         ifft_shape_slice = x.shape[-3:] if self.ffc3d else x.shape[-2:]
         output = torch.fft.irfftn(ffted, s=ifft_shape_slice, dim=fft_dim, norm=self.fft_norm)
+        output = output.to(in_dtype)
 
         if self.spatial_scale_factor is not None:
             output = F.interpolate(output, size=orig_size, mode=self.spatial_scale_mode, align_corners=False)

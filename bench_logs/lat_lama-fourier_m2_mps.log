@@ -1,0 +1,185 @@
+MODEL=lama-fourier
+############ MPS lama-fourier 1280x720 :: fp32 eager vs compile-default vs compile-reduce-overhead
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps
+16 frames  1280x720 (padded 1280x720)  warmup 10  iters 100
+loading model + timing (fp32)...
+
+W0911 11:27:27.731000 9734 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+W0911 11:28:59.476000 9734 venv-latest/lib/python3.11/site-packages/torch/_inductor/cudagraph_utils.py:401] [0/1] [__cudagraphs] skipping cudagraphs due to skipping cudagraphs due to multiple devices: device(type='mps', index=0)
+  eager                  mean  804.10  median  804.11  p90  804.90  p99  806.12  min  802.61  max  806.12 ms  |    1.2 fps
+  compile-default        mean  747.28  median  747.43  p90  748.59  p99  752.50  min  728.52  max  752.50 ms  |    1.3 fps
+  compile-reduce-overhead mean  747.23  median  747.69  p90  748.49  p99  749.22  min  724.06  max  749.22 ms  |    1.3 fps
+############ MPS lama-fourier 1280x720 compiled :: fp32 + fp16-amp (FFT in fp32)
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:33:17.671000 10041 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/1] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=None
+16 frames from id>=00138  1280x720 (padded 1280x720)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp32]  (compiled)
+  compute      mean  746.05  median  746.62  p90  747.68  p99  750.25  min  730.97  max  750.25  ms   |     1.3 fps
+  end_to_end   mean  748.20  median  748.47  p90  749.49  p99  752.61  min  735.79  max  752.61  ms   |     1.3 fps
+
+[fp16-amp]  (compiled)
+  compute      mean  590.38  median  590.55  p90  591.10  p99  591.24  min  588.50  max  591.24  ms   |     1.7 fps
+  end_to_end   mean  592.30  median  592.41  p90  593.08  p99  595.68  min  590.73  max  595.68  ms   |     1.7 fps
+
+############ MPS lama-fourier 1280x720 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:35:37.773000 10315 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [2/0] Not enough SMs to use max_autotune_gemm mode
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=1
+16 frames from id>=00138  1280x720 (padded 1280x720)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp16-half]  (compiled)
+  compute path FAILED: NotImplementedError: Unsupported dtype Half
+
+############ MPS lama-fourier 1280x720 compiled :: fp16-half, fp32 FFT island
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:35:47.241000 10322 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=None
+16 frames from id>=00138  1280x720 (padded 1280x720)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp16-half]  (compiled)
+  compute      mean  581.37  median  581.47  p90  582.05  p99  582.73  min  579.36  max  582.73  ms   |     1.7 fps
+  end_to_end   mean  583.17  median  583.36  p90  583.88  p99  585.78  min  580.82  max  585.78  ms   |     1.7 fps
+
+############ MPS lama-fourier 1024x512 :: fp32 eager vs compile-default vs compile-reduce-overhead
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps
+16 frames  1024x512 (padded 1024x512)  warmup 10  iters 100
+loading model + timing (fp32)...
+
+W0911 11:38:56.255000 10359 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+W0911 11:39:49.335000 10359 venv-latest/lib/python3.11/site-packages/torch/_inductor/cudagraph_utils.py:401] [0/1] [__cudagraphs] skipping cudagraphs due to skipping cudagraphs due to multiple devices: device(type='mps', index=0)
+  eager                  mean  443.73  median  443.75  p90  444.32  p99  445.61  min  442.45  max  445.61 ms  |    2.3 fps
+  compile-default        mean  398.29  median  398.35  p90  399.01  p99  399.35  min  393.80  max  399.35 ms  |    2.5 fps
+  compile-reduce-overhead mean  398.20  median  398.37  p90  398.90  p99  399.60  min  389.17  max  399.60 ms  |    2.5 fps
+############ MPS lama-fourier 1024x512 compiled :: fp32 + fp16-amp (FFT in fp32)
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:42:11.125000 10403 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/1] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=None
+16 frames from id>=00138  1024x512 (padded 1024x512)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp32]  (compiled)
+  compute      mean  397.84  median  397.88  p90  398.45  p99  399.06  min  396.32  max  399.06  ms   |     2.5 fps
+  end_to_end   mean  399.01  median  399.07  p90  399.73  p99  401.95  min  391.42  max  401.95  ms   |     2.5 fps
+
+[fp16-amp]  (compiled)
+  compute      mean  323.79  median  323.98  p90  324.40  p99  325.21  min  321.61  max  325.21  ms   |     3.1 fps
+  end_to_end   mean  325.33  median  325.48  p90  325.92  p99  326.41  min  323.13  max  326.41  ms   |     3.1 fps
+
+############ MPS lama-fourier 1024x512 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:43:31.579000 10453 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [2/0] Not enough SMs to use max_autotune_gemm mode
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=1
+16 frames from id>=00138  1024x512 (padded 1024x512)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp16-half]  (compiled)
+  compute path FAILED: NotImplementedError: Unsupported dtype Half
+
+############ MPS lama-fourier 1024x512 compiled :: fp16-half, fp32 FFT island
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:43:40.920000 10457 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=None
+16 frames from id>=00138  1024x512 (padded 1024x512)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp16-half]  (compiled)
+  compute      mean  317.16  median  317.32  p90  317.78  p99  318.18  min  314.92  max  318.18  ms   |     3.2 fps
+  end_to_end   mean  318.80  median  318.52  p90  320.46  p99  325.19  min  316.55  max  325.19  ms   |     3.1 fps
+
+############ MPS lama-fourier 832x480 :: fp32 eager vs compile-default vs compile-reduce-overhead
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps
+16 frames  832x480 (padded 832x480)  warmup 10  iters 100
+loading model + timing (fp32)...
+
+W0911 11:45:42.890000 10490 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+W0911 11:46:27.289000 10490 venv-latest/lib/python3.11/site-packages/torch/_inductor/cudagraph_utils.py:401] [0/1] [__cudagraphs] skipping cudagraphs due to skipping cudagraphs due to multiple devices: device(type='mps', index=0)
+  eager                  mean  358.09  median  357.58  p90  359.16  p99  381.42  min  356.40  max  381.42 ms  |    2.8 fps
+  compile-default        mean  319.56  median  319.74  p90  320.23  p99  320.78  min  316.43  max  320.78 ms  |    3.1 fps
+  compile-reduce-overhead mean  319.19  median  319.25  p90  319.90  p99  320.64  min  314.31  max  320.64 ms  |    3.1 fps
+############ MPS lama-fourier 832x480 compiled :: fp32 + fp16-amp (FFT in fp32)
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:48:23.697000 10613 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/1] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=None
+16 frames from id>=00138  832x480 (padded 832x480)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp32]  (compiled)
+  compute      mean  321.78  median  321.78  p90  322.83  p99  332.59  min  316.39  max  332.59  ms   |     3.1 fps
+  end_to_end   mean  322.53  median  322.76  p90  323.37  p99  325.11  min  316.77  max  325.11  ms   |     3.1 fps
+
+[fp16-amp]  (compiled)
+  compute      mean  259.47  median  259.33  p90  260.37  p99  263.48  min  257.96  max  263.48  ms   |     3.9 fps
+  end_to_end   mean  260.60  median  260.66  p90  260.98  p99  263.42  min  258.73  max  263.42  ms   |     3.8 fps
+
+############ MPS lama-fourier 832x480 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:49:29.901000 10768 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [2/0] Not enough SMs to use max_autotune_gemm mode
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=1
+16 frames from id>=00138  832x480 (padded 832x480)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp16-half]  (compiled)
+  compute path FAILED: NotImplementedError: Unsupported dtype Half
+
+############ MPS lama-fourier 832x480 compiled :: fp16-half, fp32 FFT island
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0911 11:49:39.140000 10772 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/Users/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0  device mps  LAMA_FP16_FFT=None
+16 frames from id>=00138  832x480 (padded 832x480)  warmup 10  iters 100
+loading model from /Users/zhukov/git/lama/lama-fourier ...
+
+[fp16-half]  (compiled)
+  compute      mean  253.54  median  253.64  p90  254.09  p99  255.13  min  251.99  max  255.13  ms   |     3.9 fps
+  end_to_end   mean  254.31  median  254.42  p90  254.66  p99  255.09  min  252.94  max  255.09  ms   |     3.9 fps
+
+BENCH_DONE_OK
