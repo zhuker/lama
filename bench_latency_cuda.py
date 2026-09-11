@@ -58,6 +58,8 @@ def parse_args():
                    help='comma list of: fp32, fp16-amp, fp16-half')
     p.add_argument('--compile', action='store_true',
                    help='torch.compile the model (fuses kernels; one-time compile cost)')
+    p.add_argument('--compile-mode', default='reduce-overhead',
+                   help="torch.compile mode when --compile is set (default: reduce-overhead / CUDA graphs)")
     return p.parse_args()
 
 
@@ -110,10 +112,10 @@ def summarize(name, lat_ms):
 
 
 def bench_precision(mode, model_dir, checkpoint, device, gpu_frames, host_frames, warmup, iters,
-                    do_compile=False):
+                    do_compile=False, compile_mode='reduce-overhead'):
     """gpu_frames: list of (image, mask) resident on GPU (fp32).
        host_frames: list of (pinned image, pinned mask) on CPU for end-to-end path."""
-    print(f'[{mode}]')
+    print(f'[{mode}]' + (f'  (compiled: {compile_mode})' if do_compile else '  (eager)'))
     use_half = (mode == 'fp16-half')
     use_amp = (mode == 'fp16-amp')
 
@@ -127,7 +129,7 @@ def bench_precision(mode, model_dir, checkpoint, device, gpu_frames, host_frames
         host = host_frames
 
     if do_compile:
-        model = torch.compile(model, dynamic=False)
+        model = torch.compile(model, dynamic=False, mode=compile_mode)
 
     nf = len(frames)
 
@@ -136,6 +138,7 @@ def bench_precision(mode, model_dir, checkpoint, device, gpu_frames, host_frames
         return torch.autocast('cuda', dtype=torch.float16) if use_amp else contextlib.nullcontext()
 
     # ---- compute-only latency (inputs already on GPU) ----
+    nan_seen = False
     try:
         with torch.no_grad():
             for i in range(warmup):
@@ -153,6 +156,8 @@ def bench_precision(mode, model_dir, checkpoint, device, gpu_frames, host_frames
                     out = model({'image': im, 'mask': mk})['inpainted']
                 torch.cuda.synchronize()
                 comp.append((time.perf_counter() - t0) * 1000.0)
+                if i == 0:
+                    nan_seen = bool(torch.isnan(out).any().item())
     except Exception as e:
         print(f'  compute path FAILED: {type(e).__name__}: {e}')
         del model
@@ -183,6 +188,8 @@ def bench_precision(mode, model_dir, checkpoint, device, gpu_frames, host_frames
 
     summarize('compute', comp)
     summarize('end_to_end', e2e)
+    if nan_seen:
+        print('  ** NaN detected in output (numerically unstable) **')
     del model
     torch.cuda.empty_cache()
 
@@ -224,7 +231,7 @@ def main():
     for mode in [m.strip() for m in args.precisions.split(',') if m.strip()]:
         bench_precision(mode, args.model, args.checkpoint, device,
                         gpu_frames, host_frames, args.warmup, args.iters,
-                        do_compile=args.compile)
+                        do_compile=args.compile, compile_mode=args.compile_mode)
         print()
 
 

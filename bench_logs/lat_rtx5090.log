@@ -1,0 +1,267 @@
+############ pop-os 1280x720 eager :: fp32 + fp16-amp (FFT in fp32)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp32]  (eager)
+  compute      mean   39.71  median   39.74  p90   39.80  p99   39.84  min   39.59  max   39.87  ms   |    25.2 fps
+  end_to_end   mean   40.15  median   40.14  p90   40.22  p99   40.34  min   40.05  max   40.50  ms   |    24.9 fps
+
+[fp16-amp]  (eager)
+  compute      mean   25.66  median   25.66  p90   25.71  p99   25.74  min   25.58  max   25.74  ms   |    39.0 fps
+  end_to_end   mean   26.06  median   26.06  p90   26.14  p99   26.16  min   25.97  max   26.16  ms   |    38.4 fps
+
+############ pop-os 1280x720 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+
+############ pop-os 1280x720 eager :: fp16-half, fp32 FFT island
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (eager)
+  compute      mean   25.73  median   25.73  p90   25.77  p99   25.79  min   25.66  max   25.82  ms   |    38.9 fps
+  end_to_end   mean   26.33  median   26.33  p90   26.36  p99   26.53  min   26.27  max   26.90  ms   |    38.0 fps
+
+############ pop-os 1280x720 compiled :: fp32 + fp16-amp (FFT in fp32)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp32]  (compiled: reduce-overhead)
+  compute      mean   29.36  median   29.35  p90   29.37  p99   29.87  min   29.31  max   30.68  ms   |    34.1 fps
+  end_to_end   mean   29.58  median   29.57  p90   29.59  p99   30.05  min   29.54  max   30.09  ms   |    33.8 fps
+
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean   15.79  median   15.78  p90   15.80  p99   16.22  min   15.75  max   16.97  ms   |    63.3 fps
+  end_to_end   mean   15.98  median   15.99  p90   16.01  p99   16.29  min   15.62  max   16.56  ms   |    62.6 fps
+
+############ pop-os 1280x720 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (compiled: reduce-overhead)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+
+############ pop-os 1280x720 compiled :: fp16-half, fp32 FFT island
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean   15.56  median   15.55  p90   15.56  p99   15.95  min   15.51  max   16.69  ms   |    64.3 fps
+  end_to_end   mean   16.14  median   16.13  p90   16.15  p99   16.47  min   16.11  max   16.79  ms   |    62.0 fps
+
+############ pop-os 1024x512 eager :: fp32 + fp16-amp (FFT in fp32)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp32]  (eager)
+  compute      mean   25.16  median   25.16  p90   25.19  p99   25.21  min   25.10  max   25.31  ms   |    39.7 fps
+  end_to_end   mean   25.47  median   25.47  p90   25.50  p99   25.74  min   25.42  max   25.74  ms   |    39.3 fps
+
+[fp16-amp]  (eager)
+  compute      mean   17.55  median   17.55  p90   17.56  p99   17.60  min   17.52  max   17.61  ms   |    57.0 fps
+  end_to_end   mean   17.84  median   17.84  p90   17.86  p99   17.90  min   17.79  max   18.00  ms   |    56.1 fps
+
+############ pop-os 1024x512 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (eager)
+  compute      mean   16.49  median   16.49  p90   16.51  p99   16.53  min   16.43  max   16.69  ms   |    60.7 fps
+  end_to_end   mean   16.81  median   16.81  p90   16.83  p99   17.07  min   16.77  max   17.23  ms   |    59.5 fps
+
+############ pop-os 1024x512 eager :: fp16-half, fp32 FFT island
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (eager)
+  compute      mean   17.73  median   17.73  p90   17.75  p99   17.77  min   17.70  max   17.88  ms   |    56.4 fps
+  end_to_end   mean   18.08  median   18.08  p90   18.11  p99   18.31  min   18.02  max   18.36  ms   |    55.3 fps
+
+############ pop-os 1024x512 compiled :: fp32 + fp16-amp (FFT in fp32)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp32]  (compiled: reduce-overhead)
+  compute      mean   18.79  median   18.78  p90   18.80  p99   18.94  min   18.76  max   20.09  ms   |    53.2 fps
+  end_to_end   mean   18.93  median   18.92  p90   18.94  p99   19.50  min   18.89  max   19.58  ms   |    52.8 fps
+
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean   10.77  median   10.77  p90   10.78  p99   10.85  min   10.76  max   10.89  ms   |    92.8 fps
+  end_to_end   mean   10.92  median   10.91  p90   10.92  p99   11.21  min   10.89  max   11.34  ms   |    91.6 fps
+
+############ pop-os 1024x512 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean    9.70  median    9.68  p90    9.69  p99   10.60  min    9.66  max   10.97  ms   |   103.1 fps
+  end_to_end   mean   10.03  median   10.02  p90   10.05  p99   10.23  min   10.00  max   10.29  ms   |    99.7 fps
+
+############ pop-os 1024x512 compiled :: fp16-half, fp32 FFT island
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean   10.49  median   10.48  p90   10.49  p99   10.75  min   10.46  max   11.81  ms   |    95.3 fps
+  end_to_end   mean   10.84  median   10.84  p90   10.85  p99   11.03  min   10.80  max   11.04  ms   |    92.2 fps
+
+############ pop-os 832x480 eager :: fp32 + fp16-amp (FFT in fp32)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp32]  (eager)
+  compute      mean   20.50  median   20.50  p90   20.54  p99   20.57  min   20.44  max   20.67  ms   |    48.8 fps
+  end_to_end   mean   20.87  median   20.86  p90   20.90  p99   21.02  min   20.82  max   21.06  ms   |    47.9 fps
+
+[fp16-amp]  (eager)
+  compute      mean   14.43  median   14.42  p90   14.44  p99   14.45  min   14.41  max   14.45  ms   |    69.3 fps
+  end_to_end   mean   14.65  median   14.65  p90   14.66  p99   14.71  min   14.62  max   14.73  ms   |    68.3 fps
+
+############ pop-os 832x480 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[60, 104]
+
+############ pop-os 832x480 eager :: fp16-half, fp32 FFT island
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (eager)
+  compute      mean   14.72  median   14.72  p90   14.73  p99   14.77  min   14.69  max   14.95  ms   |    67.9 fps
+  end_to_end   mean   15.05  median   15.00  p90   15.02  p99   16.85  min   14.97  max   16.88  ms   |    66.4 fps
+
+############ pop-os 832x480 compiled :: fp32 + fp16-amp (FFT in fp32)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp32]  (compiled: reduce-overhead)
+  compute      mean   15.42  median   15.41  p90   15.42  p99   15.71  min   15.35  max   16.75  ms   |    64.9 fps
+  end_to_end   mean   15.53  median   15.52  p90   15.54  p99   15.87  min   15.50  max   15.88  ms   |    64.4 fps
+
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean    8.67  median    8.66  p90    8.68  p99    8.76  min    8.65  max    9.32  ms   |   115.3 fps
+  end_to_end   mean    8.80  median    8.80  p90    8.81  p99    8.94  min    8.79  max    9.03  ms   |   113.6 fps
+
+############ pop-os 832x480 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (compiled: reduce-overhead)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[60, 104]
+
+############ pop-os 832x480 compiled :: fp16-half, fp32 FFT island
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/alexzhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device NVIDIA GeForce RTX 5090
+16 frames  832x480 (padded 832x480)  warmup 20  iters 200
+loading model from /home/alexzhukov/git/lama/big-lama ...
+
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean    8.37  median    8.36  p90    8.37  p99    8.44  min    8.35  max    9.69  ms   |   119.4 fps
+  end_to_end   mean    8.64  median    8.63  p90    8.65  p99    8.84  min    8.61  max    8.86  ms   |   115.7 fps
+
+BENCH_DONE_OK

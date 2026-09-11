@@ -1,0 +1,217 @@
+############ zhuker-blade 1280x720 eager :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 45, 300 MHz, 8.48 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp32]  (eager)
+  compute      mean  377.26  median  379.30  p90  387.71  p99  392.07  min  360.16  max  392.07  ms   |     2.7 fps
+  end_to_end   mean  401.60  median  401.71  p90  408.09  p99  409.07  min  391.90  max  409.07  ms   |     2.5 fps
+[fp16-amp]  (eager)
+  compute      mean  197.78  median  197.91  p90  199.00  p99  200.13  min  195.12  max  200.13  ms   |     5.1 fps
+  end_to_end   mean  201.62  median  201.86  p90  202.48  p99  203.11  min  199.25  max  203.11  ms   |     5.0 fps
+############ zhuker-blade 1280x720 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 53, 300 MHz, 8.78 W]
+  warnings.warn(
+/home/zhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+############ zhuker-blade 1280x720 eager :: fp16-half, fp32 FFT island   [gpu before: 48, 300 MHz, 8.60 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (eager)
+  compute      mean  182.69  median  182.80  p90  184.14  p99  184.54  min  178.66  max  184.54  ms   |     5.5 fps
+  end_to_end   mean  188.03  median  187.87  p90  189.65  p99  191.02  min  185.05  max  191.02  ms   |     5.3 fps
+############ zhuker-blade 1280x720 compiled :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 51, 300 MHz, 8.68 W]
+  warnings.warn(
+W0911 10:20:09.172000 17726 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+WARNING:triton.runtime.build:Triton cache error: compiled module cuda_utils.so could not be loaded
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp32]  (compiled: reduce-overhead)
+  compute      mean  389.33  median  389.64  p90  396.79  p99  400.26  min  377.75  max  400.26  ms   |     2.6 fps
+  end_to_end   mean  411.25  median  410.98  p90  415.82  p99  419.21  min  404.31  max  419.21  ms   |     2.4 fps
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean  131.49  median  131.49  p90  133.68  p99  134.70  min  128.57  max  134.70  ms   |     7.6 fps
+  end_to_end   mean  136.55  median  136.60  p90  138.02  p99  138.81  min  134.40  max  138.81  ms   |     7.3 fps
+############ zhuker-blade 1280x720 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 53, 300 MHz, 8.80 W]
+  warnings.warn(
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+W0911 10:24:42.684000 18577 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[90, 160]
+############ zhuker-blade 1280x720 compiled :: fp16-half, fp32 FFT island   [gpu before: 49, 300 MHz, 8.56 W]
+  warnings.warn(
+W0911 10:26:21.980000 18879 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1280x720 (padded 1280x720)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean  124.25  median  124.45  p90  126.20  p99  127.44  min  118.35  max  127.44  ms   |     8.0 fps
+  end_to_end   mean  128.55  median  128.68  p90  129.78  p99  131.23  min  125.95  max  131.23  ms   |     7.8 fps
+############ zhuker-blade 1024x512 eager :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 51, 300 MHz, 8.66 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp32]  (eager)
+  compute      mean  210.43  median  211.07  p90  213.91  p99  215.40  min  203.01  max  215.40  ms   |     4.8 fps
+  end_to_end   mean  220.55  median  221.02  p90  223.42  p99  226.49  min  215.26  max  226.49  ms   |     4.5 fps
+[fp16-amp]  (eager)
+  compute      mean  109.79  median  109.78  p90  110.58  p99  111.04  min  108.30  max  111.04  ms   |     9.1 fps
+  end_to_end   mean  111.71  median  111.80  p90  112.42  p99  112.88  min  110.64  max  112.88  ms   |     9.0 fps
+############ zhuker-blade 1024x512 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 53, 300 MHz, 8.98 W]
+  warnings.warn(
+/home/zhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (eager)
+  compute      mean   89.22  median   89.30  p90   90.07  p99   90.38  min   85.03  max   90.38  ms   |    11.2 fps
+  end_to_end   mean   91.86  median   91.88  p90   92.34  p99   92.73  min   91.14  max   92.73  ms   |    10.9 fps
+############ zhuker-blade 1024x512 eager :: fp16-half, fp32 FFT island   [gpu before: 51, 300 MHz, 8.72 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (eager)
+  compute      mean  102.38  median  102.20  p90  103.45  p99  103.68  min   99.03  max  103.68  ms   |     9.8 fps
+  end_to_end   mean  104.40  median  104.47  p90  104.73  p99  105.04  min  103.43  max  105.04  ms   |     9.6 fps
+############ zhuker-blade 1024x512 compiled :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 50, 300 MHz, 9.06 W]
+  warnings.warn(
+W0911 10:33:58.221000 19723 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp32]  (compiled: reduce-overhead)
+  compute      mean  214.58  median  214.11  p90  218.80  p99  222.13  min  206.27  max  222.13  ms   |     4.7 fps
+  end_to_end   mean  223.41  median  222.37  p90  227.65  p99  229.94  min  220.64  max  229.94  ms   |     4.5 fps
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean   74.79  median   74.77  p90   75.59  p99   75.88  min   73.63  max   75.88  ms   |    13.4 fps
+  end_to_end   mean   76.50  median   76.52  p90   77.14  p99   77.93  min   75.55  max   77.93  ms   |    13.1 fps
+############ zhuker-blade 1024x512 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 52, 300 MHz, 8.64 W]
+  warnings.warn(
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+W0911 10:37:26.663000 20285 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean   63.02  median   63.12  p90   63.51  p99   63.89  min   58.31  max   63.89  ms   |    15.9 fps
+  end_to_end   mean   64.27  median   64.31  p90   64.98  p99   65.47  min   63.37  max   65.47  ms   |    15.6 fps
+############ zhuker-blade 1024x512 compiled :: fp16-half, fp32 FFT island   [gpu before: 50, 300 MHz, 8.63 W]
+  warnings.warn(
+W0911 10:39:21.823000 20601 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  1024x512 (padded 1024x512)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean   69.99  median   69.93  p90   70.75  p99   71.24  min   66.39  max   71.24  ms   |    14.3 fps
+  end_to_end   mean   72.22  median   72.20  p90   73.03  p99   73.20  min   71.14  max   73.20  ms   |    13.8 fps
+############ zhuker-blade 832x480 eager :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 50, 300 MHz, 8.54 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  832x480 (padded 832x480)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp32]  (eager)
+  compute      mean  168.49  median  168.57  p90  171.88  p99  173.30  min  161.08  max  173.30  ms   |     5.9 fps
+  end_to_end   mean  175.66  median  175.70  p90  177.84  p99  178.94  min  172.02  max  178.94  ms   |     5.7 fps
+[fp16-amp]  (eager)
+  compute      mean   85.39  median   85.35  p90   85.84  p99   86.18  min   84.45  max   86.18  ms   |    11.7 fps
+  end_to_end   mean   86.26  median   86.25  p90   86.46  p99   86.80  min   85.92  max   86.80  ms   |    11.6 fps
+############ zhuker-blade 832x480 eager :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 52, 300 MHz, 8.69 W]
+  warnings.warn(
+/home/zhukov/git/lama/saicinpainting/training/modules/ffc.py:100: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  ffted = torch.fft.rfftn(x if fp16_fft else x.float(), dim=fft_dim, norm=self.fft_norm)
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  832x480 (padded 832x480)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (eager)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[60, 104]
+############ zhuker-blade 832x480 eager :: fp16-half, fp32 FFT island   [gpu before: 48, 300 MHz, 8.59 W]
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  832x480 (padded 832x480)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (eager)
+  compute      mean   81.53  median   81.60  p90   82.11  p99   82.38  min   78.65  max   82.38  ms   |    12.3 fps
+  end_to_end   mean   82.94  median   82.92  p90   83.36  p99   84.01  min   82.23  max   84.01  ms   |    12.1 fps
+############ zhuker-blade 832x480 compiled :: fp32 + fp16-amp (FFT in fp32)   [gpu before: 49, 300 MHz, 8.51 W]
+  warnings.warn(
+W0911 10:46:00.113000 21368 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  832x480 (padded 832x480)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp32]  (compiled: reduce-overhead)
+  compute      mean  169.85  median  170.16  p90  172.71  p99  173.97  min  163.24  max  173.97  ms   |     5.9 fps
+  end_to_end   mean  173.90  median  174.05  p90  176.73  p99  179.40  min  169.59  max  179.40  ms   |     5.8 fps
+[fp16-amp]  (compiled: reduce-overhead)
+  compute      mean   54.63  median   54.63  p90   55.08  p99   55.19  min   54.09  max   55.19  ms   |    18.3 fps
+  end_to_end   mean   55.65  median   55.69  p90   55.98  p99   56.36  min   55.21  max   56.36  ms   |    18.0 fps
+############ zhuker-blade 832x480 compiled :: fp16-half, native half FFT (LAMA_FP16_FFT=1)   [gpu before: 51, 300 MHz, 8.78 W]
+  warnings.warn(
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_refs/__init__.py:5263: UserWarning: ComplexHalf support is experimental and many operators don't support it yet. (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/EmptyTensor.cpp:54.)
+  return torch.empty(
+W0911 10:49:11.504000 21891 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  832x480 (padded 832x480)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute path FAILED: RuntimeError: cuFFT only supports dimensions whose sizes are powers of two when computing in half precision, but got a signal size of[60, 104]
+############ zhuker-blade 832x480 compiled :: fp16-half, fp32 FFT island   [gpu before: 48, 300 MHz, 8.52 W]
+  warnings.warn(
+W0911 10:50:49.754000 22217 venv-latest/lib/python3.11/site-packages/torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+/home/zhukov/git/lama/venv-latest/lib/python3.11/site-packages/torch/_inductor/lowering.py:2774: UserWarning: Torchinductor does not support code generation for complex operators. Performance may be worse than eager.
+  warnings.warn(
+Detectron v2 is not installed
+torch 2.14.0+cu130  cuda 13.0  device Quadro RTX 5000 with Max-Q Design
+16 frames  832x480 (padded 832x480)  warmup 20  iters 100
+loading model from /home/zhukov/git/lama/big-lama ...
+[fp16-half]  (compiled: reduce-overhead)
+  compute      mean   52.81  median   52.82  p90   53.21  p99   53.45  min   50.85  max   53.45  ms   |    18.9 fps
+  end_to_end   mean   54.03  median   54.04  p90   54.39  p99   54.73  min   53.36  max   54.73  ms   |    18.5 fps
+BENCH_DONE_OK
